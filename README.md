@@ -1,4 +1,4 @@
-# NFT Viewer
+# Nifty Gallery
 
 A simple gallery style browser-based NFT viewer for displaying on a TV or tablet.
 
