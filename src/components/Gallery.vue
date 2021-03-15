@@ -8,7 +8,7 @@
             <div class="arrow left" @click="prevImage">◄</div>
             <div class="image-label">
               <p>{{ assets[currentAsset].name }}</p>
-              <p class="count-label">Work #{{currentAsset+1}} of {{assets.length}} in collection</p>
+              <p class="count-label">#{{currentAsset+1}} of {{assets.length}} in collection</p>
               <p class="label-settings" @click="toggleShowSettings">Settings</p>
               <p class="label-about" @click="toggleShowAbout">About</p>
             </div>
@@ -28,16 +28,22 @@
         <p @click="getAccountAssets" class="label-hide">Load</p>
       </div>
       <div class="block about" v-show="showAbout">
+        <h2>Directions</h2>
         <p>
-          <strong>Directions:</strong> Paste an <a href="https://etherscan.io/apis">Etherscan API Key</a> and a wallet key into the textboxes and press load. Requires a Metamask connection, this is only used for querying Etherum network, no signatures are needed and no transactions are made. The arrow keys can also be used for navigation.
+          Paste an <a href="https://etherscan.io/apis">Etherscan API Key</a> and a wallet key into the textboxes and press load. Requires a Metamask connection, this is only used for querying Etherum network, no signatures are needed and no transactions are made. The arrow keys can also be used for navigation.
         </p>
+        <p>The wallet address, token contract ABIs, and token information will be saved in your browsers localStorage. Subsequent reloads will automatically load from this cache instead of querying the network. Pressing the load button resets the cache and queries the wallet address again</p>
+        <p>You can also pass a wallet address directly in the URL with the 'w?=' parameter.</p>
+        <p>For example: https://niftyviewer.art/<strong>?w=0xc643c9411a6b489e9833b16631140f42bbfcb6d1</strong></p>
+        <p>Additionally adding the  'n?=' parameter with a number will skip directly to that asset in the wallets collection (only if cached).</p>
+        <p>For example: https://niftyviewer.art/?w=0xc643c9411a6b489e9833b16631140f42bbfcb6d1<strong>&n=3</strong></p>
+        <h2>How it works</h2>
         <p>
-          The page will iterate through all ERC-721 transactions for that wallet.
-          Then it uses the Etherscan API to get the ABI for each token contract and then uses Ethers.js to make the call the contract and verify token ownership.
-          Finally the OpenSea API is called to get the tokens name and image data.
+          The Etherscan API is used to find all ERC-721 transactions associated with a wallet address. Then the same API is used to retrieve and cache the ABI of each tokens contract. The contracts 'ownerOf' function is called using Ethers.js with the token ID to verify that the wallet still owns that token. Once verified the OpenSea API is called to retreive token metadata and CDN cached image URLs.
         </p>
         <p class="about-twitter"><a href="twitter.com/cyrxopto">Created by @Cyrxopto</a></p>
-        <p class="about-tip">Tips:<img src="favicon.ico" class="eth-logo"><span class="about-address">0x576AA6D2229e636a61486E5Ec04451Da7B28B198</span></p>
+        <p class="about-tip">Tips:<img src="favicon.ico" class="eth-logo"><span class="about-address">0x66d2D6cc05473c7526610103097f84A84f606AB8</span></p>
+        <p class="about-tip"><a href="https://github.com/Cyrxopto/nifty-gallery">View Source</a>
         <p @click="toggleShowAbout" class="label-hide">Hide</p>
       </div>
     </div>
@@ -61,7 +67,13 @@ export default {
   },
 
   mounted () {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.has('w')) this.targetAddress = urlParams.get('w')
+    if (urlParams.has('n')) this.currentAsset = Number(urlParams.get('n')) - 1 | 0
+
+
     this.loadCachedAssets()
+
     let that = this
     document.onkeydown = function(e) {
       e = e || window.event
@@ -371,14 +383,17 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   font-size: 1rem;
   margin-bottom: 5vmin;
+  text-align: left;
 }
 
 .about-twitter {
   margin: 0 0 0.5rem 0;
+  text-align: center;
 }
 
 .about-tip {
   margin: 0 0 0.5rem 0;
+  text-align: center;
 }
 
 .eth-logo {
@@ -395,5 +410,12 @@ export default {
   cursor: pointer;
   user-select: none;
   display: inline-block;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+h2 {
+  text-align: center;
 }
 </style>
