@@ -8,11 +8,9 @@
             <div class="arrow left" @click="prevImage">◄</div>
             <div class="image-label">
               <p>{{ assets[currentAsset].name }}</p>
-              <p class="count-label">{{currentAsset+1}}/{{assets.length}}</p>
-              <!-- <div v-if="assets[currentAsset].traits">
-                <p>Traits:</p>
-                <p>{{ assets[currentAsset].traits }}</p>
-              </div> -->
+              <p class="count-label">Work #{{currentAsset+1}} of {{assets.length}} in collection</p>
+              <p class="label-settings" @click="toggleShowSettings">Settings</p>
+              <p class="label-about" @click="toggleShowAbout">About</p>
             </div>
             <div class="arrow right" @click="nextImage">►</div>
           </div>
@@ -27,7 +25,20 @@
           <span>Wallet Address</span>
           <input type="text" v-model="targetAddress">
         </div>
-        <button @click="getAccountAssets">Load</button>
+        <p @click="getAccountAssets" class="label-hide">Load</p>
+      </div>
+      <div class="block about" v-show="showAbout">
+        <p>
+          <strong>Directions:</strong> Paste an <a href="https://etherscan.io/apis">Etherscan API Key</a> and a wallet key into the textboxes and press load. Requires a Metamask connection, this is only used for querying Etherum network, no signatures are needed and no transactions are made. The arrow keys can also be used for navigation.
+        </p>
+        <p>
+          The page will iterate through all ERC-721 transactions for that wallet.
+          Then it uses the Etherscan API to get the ABI for each token contract and then uses Ethers.js to make the call the contract and verify token ownership.
+          Finally the OpenSea API is called to get the tokens name and image data.
+        </p>
+        <p class="about-twitter"><a href="twitter.com/cyrxopto">Created by @Cyrxopto</a></p>
+        <p class="about-tip">Tips:<img src="favicon.ico" class="eth-logo"><span class="about-address">0x576AA6D2229e636a61486E5Ec04451Da7B28B198</span></p>
+        <p @click="toggleShowAbout" class="label-hide">Hide</p>
       </div>
     </div>
   </div>
@@ -44,16 +55,30 @@ export default {
       assets: [],
       contractAbis: {},
       currentAsset: 0,
-      showSettings: true
+      showSettings: false,
+      showAbout: false
     }
   },
 
   mounted () {
-    // this.getAccountAssets()
     this.loadCachedAssets()
+    let that = this
+    document.onkeydown = function(e) {
+      e = e || window.event
+      if (e.key == 'ArrowLeft') that.prevImage()
+      else if (e.key == 'ArrowRight') that.nextImage()
+    }
   },
 
   methods: {
+    toggleShowSettings () {
+      this.showSettings = !this.showSettings
+    },
+
+    toggleShowAbout() {
+      this.showAbout= !this.showAbout
+    },
+
     prevImage () {
       if (!this.currentAsset) return
       this.currentAsset--
@@ -194,7 +219,7 @@ export default {
 
 <style scoped lang="scss">
 .image-frame {
-  margin-top: 10vmin;
+  margin-top: 5vmin;
   background-color: #ddc;
   border:solid 5vmin  #eee;
   border-bottom-color: #fff;
@@ -246,7 +271,7 @@ export default {
   display: flex;
 }
 
-.image-label, .settings {
+.image-label, .settings, .about {
   background-color: #eee;
   box-shadow: 0 0 5px 0 rgba(0,0,0,.25) inset, 0 5px 10px 5px rgba(0, 0, 0, .25);
   box-sizing: border-box;
@@ -297,7 +322,7 @@ export default {
   display: block;
 }
 
-.settings {
+.settings, .about {
   position: relative;
   max-width: 400px;
   margin: 0 auto;
@@ -305,5 +330,70 @@ export default {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   font-size: 1rem;
   text-align: center;
+}
+
+.label-about, .label-settings {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  position: absolute;
+  top: 0;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 0.5rem;
+  display: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.label-wrapper:hover .label-settings {
+  display: block;
+}
+
+.label-wrapper:hover .label-about {
+  display: block;
+}
+
+.label-about {
+  right: 1rem;
+}
+
+.label-about:hover, .label-settings:hover, .label-hide:hover {
+  background-color: #ccc;
+}
+
+.label-settings {
+  left: 1rem;
+}
+
+.about {
+  margin-top: 2vmin;
+  max-width: 800px;
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  margin-bottom: 5vmin;
+}
+
+.about-twitter {
+  margin: 0 0 0.5rem 0;
+}
+
+.about-tip {
+  margin: 0 0 0.5rem 0;
+}
+
+.eth-logo {
+  width: 1rem;
+  user-select: none;
+}
+
+.label-hide {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-size: 1rem;
+  border: 1px solid black;
+  border-radius: 4px;
+  padding: 0.5rem 1rem 0.5rem 1rem;
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
 }
 </style>

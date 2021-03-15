@@ -13,7 +13,7 @@ This applicaiton has the following dependencies:
 * Etherscan API
   * Used to query wallet address for ERC-721 transactions
   * Used to get a contracts ABI
-* Web3.js
+* Ethers.js
   * Used to query contracts to verify token ownership
 * OpenSea
   * API is used to get tokens name and traits
