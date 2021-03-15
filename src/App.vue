@@ -16,12 +16,23 @@ export default {
 </script>
 
 <style>
+body {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background-image: linear-gradient(#eee, #aaa);
+}
+
 #app {
+  margin: 0;
+  padding: 0;
+  border: none;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  height: 100vh;
+  width: 100vw;
 }
 </style>
