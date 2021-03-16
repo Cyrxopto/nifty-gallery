@@ -217,7 +217,7 @@ export default {
     getContractABI(contractAddress) {
       return new Promise((resolve, reject) => {
         setTimeout(() => {
-          this.$http.get(`http://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}&apikey=${this.etherscanApiKey}`).then((resp) => {
+          this.$http.get(`https://api.etherscan.io/api?module=contract&action=getabi&address=${contractAddress}&apikey=${this.etherscanApiKey}`).then((resp) => {
             if (resp.data.result === 'Contract source code not verified') {
               reject(resp.data.result)
             } else resolve(resp.data.result)
