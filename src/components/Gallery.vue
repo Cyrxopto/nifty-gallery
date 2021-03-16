@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="showFrame">
-      <div class="block"><div class="image-frame"><img :src="assets[currentAsset].images.url"></div></div>
+      <div class="block"><div class="image-frame"><img :src="assets[currentAsset].images.originalUrl"></div></div>
       <div class="block">
         <div class="flex-block">
           <div class="label-wrapper">
@@ -258,6 +258,9 @@ export default {
 
 <style scoped lang="scss">
 .image-frame {
+  width: auto;
+  height: 75vh;
+  max-height: 75vh;
   margin-top: 5vmin;
   background-color: #ddc;
   border:solid 5vmin  #eee;
