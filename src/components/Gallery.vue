@@ -68,8 +68,8 @@ export default {
       showSettings: true,
       showAbout: true,
       showStatus: true,
-      statusAction: 'Waiting...',
-      statusContract: '',
+      statusAction: 'Enter a wallet address and press load',
+      statusContract: 'Waiting...',
       showFrame: false
     }
   },
@@ -99,13 +99,13 @@ export default {
     },
 
     prevImage () {
-      if (!this.currentAsset) return
+      if (!this.currentAsset) this.currentAsset = this.assets.length
       this.currentAsset--
     },
 
     nextImage () {
-      if (!this.currentAsset === this.assets.length) return
-      this.currentAsset++
+      if (this.currentAsset + 1 >= this.assets.length) this.currentAsset = 0
+      else this.currentAsset++
     },
 
     loadCachedAssets () {
@@ -114,9 +114,7 @@ export default {
         return
       }
       const savedAssets = window.localStorage.getItem('savedAssets')
-      if (savedAddress === null || savedAssets === null || this.targetAddress !== savedAddress) {
-        this.statusAction = 'Cache error. Enter a wallet address and click load'
-      } else {
+      if (savedAssets !== null) {
         try {
           this.statusAction = 'Loading assets from cache...'
           this.assets = JSON.parse(savedAssets)
@@ -131,6 +129,9 @@ export default {
     },
 
     getAccountAssets: async function () {
+      this.showFrame = false
+      this.showSettings = true
+      this.showStatus = true
       this.assets = []
       window.localStorage.removeItem('savedAssets')
       this.statusContract = 'Ethereum Network'
