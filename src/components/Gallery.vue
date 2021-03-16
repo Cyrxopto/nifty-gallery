@@ -448,6 +448,7 @@ export default {
 
 .settings {
   text-align: left;
+  margin-bottom: 5vmin;
 
   div {
     margin-bottom: 0.5rem;
