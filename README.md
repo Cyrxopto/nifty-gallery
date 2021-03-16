@@ -8,8 +8,6 @@ Enter a wallet address and it will automatically pull in all ERC-721 balances an
 
 This applicaiton has the following dependencies:
 
-* Metamask
-  * Used to connect to the Ethereum network to query token contracts
 * Etherscan API
   * Used to query wallet address for ERC-721 transactions
   * Used to get a contracts ABI

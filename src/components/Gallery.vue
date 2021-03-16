@@ -35,7 +35,7 @@
       <div class="block about" v-show="showAbout">
         <h2>Directions</h2>
         <p>
-          Paste an <a href="https://etherscan.io/apis">Etherscan API Key</a> and a wallet key into the textboxes and press load. Requires a Metamask connection, this is only used for querying Etherum network, no signatures are needed and no transactions are made. The arrow keys can also be used for navigation.
+          Paste an <a href="https://etherscan.io/apis">Etherscan API Key</a> and a wallet key into the textboxes and press load. The arrow keys can also be used for navigation.
         </p>
         <p>The wallet address, token contract ABIs, and token information will be saved in your browsers localStorage. Subsequent reloads will automatically load from this cache instead of querying the network. Pressing the load button resets the cache and queries the wallet address again</p>
         <p>You can also pass a wallet address directly in the URL with the 'w?=' parameter.</p>
