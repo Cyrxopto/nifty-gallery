@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-if="assets.length">
+    <div v-if="showFrame">
       <div class="block"><div class="image-frame"><img :src="assets[currentAsset].images.url"></div></div>
       <div class="block">
         <div class="flex-block">
@@ -9,13 +9,18 @@
             <div class="image-label">
               <p>{{ assets[currentAsset].name }}</p>
               <p class="count-label">#{{currentAsset+1}} of {{assets.length}} in collection</p>
-              <p class="label-settings" @click="toggleShowSettings">Settings</p>
-              <p class="label-about" @click="toggleShowAbout">About</p>
+              <p class="btn label-settings" @click="toggleShowSettings">Settings</p>
+              <p class="btn label-about" @click="toggleShowAbout">About</p>
             </div>
             <div class="arrow right" @click="nextImage">►</div>
           </div>
         </div>
       </div>
+    </div>
+    <div class="block status" v-if="showStatus">
+      <p>{{ statusContract }}</p>
+      <p>{{ statusAction }}</p>
+    </div>
       <div class="block settings" v-show="showSettings">
         <div>
           <span>Etherscan API Key</span>
@@ -25,7 +30,7 @@
           <span>Wallet Address</span>
           <input type="text" v-model="targetAddress">
         </div>
-        <p @click="getAccountAssets" class="label-hide">Load</p>
+      <p @click="getAccountAssets" class="btn label-hide">Load</p>
       </div>
       <div class="block about" v-show="showAbout">
         <h2>Directions</h2>
@@ -44,10 +49,9 @@
         <p class="about-twitter"><a href="twitter.com/cyrxopto">Created by @Cyrxopto</a></p>
         <p class="about-tip">Tips:<img src="favicon.ico" class="eth-logo"><span class="about-address">0x66d2D6cc05473c7526610103097f84A84f606AB8</span></p>
         <p class="about-tip"><a href="https://github.com/Cyrxopto/nifty-gallery">View Source</a>
-        <p @click="toggleShowAbout" class="label-hide">Hide</p>
+      <p @click="toggleShowAbout" class="btn label-hide" v-if="showFrame">Hide</p>
       </div>
     </div>
-  </div>
 </template>
 
 <script>
@@ -57,12 +61,16 @@ export default {
   data: function() {
     return {
       etherscanApiKey: 'SDHZ9FPMUK55TY5KAU2FBS222DKPIITD65',
-      targetAddress: '0xc643c9411a6b489e9833b16631140f42bbfcb6d1',
+      targetAddress: '',
       assets: [],
       contractAbis: {},
       currentAsset: 0,
-      showSettings: false,
-      showAbout: false
+      showSettings: true,
+      showAbout: true,
+      showStatus: true,
+      statusAction: 'Waiting...',
+      statusContract: '',
+      showFrame: false
     }
   },
 
@@ -70,7 +78,6 @@ export default {
     const urlParams = new URLSearchParams(window.location.search)
     if (urlParams.has('w')) this.targetAddress = urlParams.get('w')
     if (urlParams.has('n')) this.currentAsset = Number(urlParams.get('n')) - 1 | 0
-
 
     this.loadCachedAssets()
 
@@ -103,28 +110,35 @@ export default {
 
     loadCachedAssets () {
       const savedAddress = window.localStorage.getItem('savedAddress')
+      if (savedAddress === null) {
+        return
+      }
       const savedAssets = window.localStorage.getItem('savedAssets')
       if (savedAddress === null || savedAssets === null || this.targetAddress !== savedAddress) {
-        console.log(savedAddress,this.targetAddress)
-        console.log('Cache invalid, reloading')
-        this.getAccountAssets()
+        this.statusAction = 'Cache error. Enter a wallet address and click load'
       } else {
         try {
-          console.log('Loaded assets from cache')
+          this.statusAction = 'Loading assets from cache...'
           this.assets = JSON.parse(savedAssets)
+          this.showFrame = true
+          this.showSettings = false
+          this.showAbout = false
+          this.showStatus = false
         } catch (e) {
-          console.log('Failed to load cached assets')
-          this.getAccountAssets()
+          this.statusAction = 'Cache error. Enter a wallet address and click load'
         }
       }
     },
 
     getAccountAssets: async function () {
       this.assets = []
-
+      window.localStorage.removeItem('savedAssets')
+      this.statusContract = 'Ethereum Network'
+      this.statusAction = 'Getting ERC-721 transactions via Etherscan...'
       let transactions = await this.getERC721Transactions()
-
       for (let i = 0; i < transactions.length; i++) {
+        this.statusContract = `(${i}/${transactions.length}) ${transactions[i].tokenName}`
+        this.statusAction = 'Downloading contract ABI via Etherscan...'
         const contractAddress = transactions[i].contractAddress
         let abi = window.localStorage.getItem(contractAddress)
         if (abi === null) {
@@ -145,6 +159,7 @@ export default {
           continue
         }
 
+        this.statusAction = 'Validating token ownership via Etherscan...'
         try {
           if (!await this.validateTokenOwner(contractAddress, abi, transactions[i].tokenID)) continue
           // console.log(transactions[i].tokenName)
@@ -152,6 +167,7 @@ export default {
           continue
         }
 
+        this.statusAction = 'Getting metadata and image URLs via OpenSea...'
         try {
           const images = await this.getTokenImages(contractAddress, transactions[i].tokenID)
           // console.log(images)
@@ -166,9 +182,19 @@ export default {
         }
       }
 
+      if (!this.assets.length) {
+        this.statusAction = 'Failed to load assets from this address. Check the address and try again'
+        return
+      }
+
       window.localStorage.setItem('savedAssets', JSON.stringify(this.assets))
       window.localStorage.setItem('savedAddress', this.targetAddress)
       console.log('Saved assets and address')
+
+      this.showFrame = true
+      this.showSettings = false
+      this.showAbout = false
+      this.showStatus = false
     },
 
     getERC721Transactions () {
@@ -340,17 +366,15 @@ export default {
   margin: 0 auto;
   padding: 1rem;
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  font-size: 1rem;
+  font-size: 0.8rem;
   text-align: center;
 }
 
 .label-about, .label-settings {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
   position: absolute;
   top: 0;
-  border: 1px solid black;
-  border-radius: 4px;
   padding: 0.5rem;
   display: none;
   cursor: pointer;
@@ -369,7 +393,7 @@ export default {
   right: 1rem;
 }
 
-.label-about:hover, .label-settings:hover, .label-hide:hover {
+.btn:hover {
   background-color: #ccc;
 }
 
@@ -384,7 +408,6 @@ export default {
   font-size: 1rem;
   margin-bottom: 5vmin;
   text-align: left;
-}
 
 .about-twitter {
   margin: 0 0 0.5rem 0;
@@ -400,22 +423,48 @@ export default {
   width: 1rem;
   user-select: none;
 }
+}
 
-.label-hide {
+.btn {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   font-size: 1rem;
   border: 1px solid black;
   border-radius: 4px;
-  padding: 0.5rem 1rem 0.5rem 1rem;
+  padding: 0.3rem 0.8rem 0.3rem 0.8rem;
   cursor: pointer;
   user-select: none;
+}
+
+.label-hide {
   display: inline-block;
   position: relative;
   left: 50%;
   transform: translateX(-50%);
 }
 
+.settings {
+  text-align: left;
+
+  div {
+    margin-bottom: 0.5rem;
+  }
+
+  span {
+    font-weight: bold;
+    margin-right: 1rem;
+  }
+}
+
 h2 {
   text-align: center;
+}
+
+input[type=text] {
+  margin-top: 5px;
+  width: 90%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  resize: vertical;
 }
 </style>
