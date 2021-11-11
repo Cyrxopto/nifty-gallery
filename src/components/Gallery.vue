@@ -47,7 +47,7 @@
           The Etherscan API is used to find all ERC-721 transactions associated with a wallet address. Then the same API is used to retrieve and cache the ABI of each tokens contract. The contracts 'ownerOf' function is called using Ethers.js with the token ID to verify that the wallet still owns that token. Once verified the OpenSea API is called to retreive token metadata and CDN cached image URLs.
         </p>
         <p class="about-twitter"><a href="twitter.com/cyrxopto">Created by @Cyrxopto</a></p>
-        <p class="about-tip">Tips:<img src="favicon.ico" class="eth-logo"><span class="about-address">0x66d2D6cc05473c7526610103097f84A84f606AB8</span></p>
+        <p class="about-tip">Tips:<img src="favicon.ico" class="eth-logo"><span class="about-address">0xaC91280C8580BAC0Cb520cB6C10C71372A6f08b8</span></p>
         <p class="about-tip"><img src="github-favicon.ico" class="github-logo"><a href="https://github.com/Cyrxopto/nifty-gallery">View Source</a>
       <p @click="toggleShowAbout" class="btn label-hide" v-if="showFrame">Hide</p>
       </div>
